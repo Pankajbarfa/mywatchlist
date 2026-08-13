@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AnimeHub — My Personal Watchlist</title>
+  <meta name="description" content="My personal anime watchlist — track every series I've watched with ratings, genres, and reviews." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Noto+Serif+JP:wght@400;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ──────────── PARTICLES ──────────── -->
+  <canvas id="particleCanvas"></canvas>
+
+  <!-- ──────────── HEADER ──────────── -->
+  <header class="site-header">
+    <div class="header-inner">
+      <div class="logo">
+        <span class="logo-icon">⛩</span>
+        <span class="logo-text">Anime<span class="logo-accent">Hub</span></span>
+      </div>
+      <nav class="header-nav">
+        <button class="nav-btn active" data-filter="all" id="filterAll">All</button>
+        <button class="nav-btn" data-filter="Watching" id="filterWatching">Watching</button>
+        <button class="nav-btn" data-filter="Completed" id="filterCompleted">Completed</button>
+        <button class="nav-btn" data-filter="Plan to Watch" id="filterPlan">Plan to Watch</button>
+        <button class="nav-btn" data-filter="Dropped" id="filterDropped">Dropped</button>
+      </nav>
+      <div class="header-actions">
+        <div class="search-wrap">
+          <span class="search-icon">🔍</span>
+          <input type="text" id="searchInput" placeholder="Search anime..." class="search-input" />
+        </div>
+        <button class="btn-add-main" id="openModal">
+          <span>＋</span> Add Anime
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ──────────── HERO ──────────── -->
+  <section class="hero">
+    <div class="hero-content">
+      <p class="hero-tag">✨ Personal Collection</p>
+      <h1 class="hero-title">My Anime <span class="gradient-text">Universe</span></h1>
+      <p class="hero-sub">Every series, every arc, every emotion — catalogued.</p>
+      <div class="stats-bar" id="statsBar">
+        <div class="stat-item">
+          <span class="stat-num" id="statTotal">0</span>
+          <span class="stat-label">Total</span>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat-item">
+          <span class="stat-num" id="statCompleted">0</span>
+          <span class="stat-label">Completed</span>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat-item">
+          <span class="stat-num" id="statWatching">0</span>
+          <span class="stat-label">Watching</span>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat-item">
+          <span class="stat-num" id="statEpisodes">0</span>
+          <span class="stat-label">Episodes</span>
+        </div>
+      </div>
+    </div>
+    <div class="hero-orbs">
+      <div class="orb orb-1"></div>
+      <div class="orb orb-2"></div>
+      <div class="orb orb-3"></div>
+    </div>
+  </section>
+
+  <!-- ──────────── MAIN CONTENT ──────────── -->
+  <main class="main-content">
+
+    <!-- SORT / VIEW CONTROLS -->
+    <div class="controls-bar">
+      <div class="results-count" id="resultsCount">Loading...</div>
+      <div class="controls-right">
+        <select class="sort-select" id="sortSelect">
+          <option value="dateAdded">Recently Added</option>
+          <option value="title">Title A–Z</option>
+          <option value="rating">Highest Rated</option>
+          <option value="episodes">Most Episodes</option>
+        </select>
+        <div class="view-toggle">
+          <button class="view-btn active" id="viewGrid" title="Grid View">⊞</button>
+          <button class="view-btn" id="viewList" title="List View">☰</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ANIME GRID -->
+    <div class="anime-grid" id="animeGrid"></div>
+
+    <!-- EMPTY STATE -->
+    <div class="empty-state" id="emptyState" style="display:none;">
+      <div class="empty-icon">🎌</div>
+      <h2>Your watchlist is empty!</h2>
+      <p>Start adding anime you've watched to build your collection.</p>
+      <button class="btn-add-main" onclick="document.getElementById('openModal').click()">＋ Add Your First Anime</button>
+    </div>
+
+  </main>
+
+  <!-- ──────────── ADD / EDIT MODAL ──────────── -->
+  <div class="modal-overlay" id="modalOverlay">
+    <div class="modal" id="modal">
+      <button class="modal-close" id="closeModal">✕</button>
+      <h2 class="modal-title" id="modalTitle">Add New Anime</h2>
+
+      <form id="animeForm" class="anime-form" novalidate>
+        <input type="hidden" id="editId" />
+
+        <div class="form-row">
+          <div class="form-group full">
+            <label for="fTitle">Anime Title *</label>
+            <input type="text" id="fTitle" placeholder="e.g. Attack on Titan" required />
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="fStatus">Watch Status *</label>
+            <select id="fStatus" required>
+              <option value="">Select status</option>
+              <option value="Completed">✅ Completed</option>
+              <option value="Watching">▶️ Watching</option>
+              <option value="Plan to Watch">📋 Plan to Watch</option>
+              <option value="On Hold">⏸ On Hold</option>
+              <option value="Dropped">❌ Dropped</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="fGenre">Genre</label>
+            <select id="fGenre">
+              <option value="">Select genre</option>
+              <option>Action</option>
+              <option>Adventure</option>
+              <option>Comedy</option>
+              <option>Drama</option>
+              <option>Fantasy</option>
+              <option>Horror</option>
+              <option>Isekai</option>
+              <option>Mecha</option>
+              <option>Mystery</option>
+              <option>Psychological</option>
+              <option>Romance</option>
+              <option>Sci-Fi</option>
+              <option>Shonen</option>
+              <option>Shoujo</option>
+              <option>Seinen</option>
+              <option>Slice of Life</option>
+              <option>Sports</option>
+              <option>Supernatural</option>
+              <option>Thriller</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="fEpisodes">Episodes Watched</label>
+            <input type="number" id="fEpisodes" placeholder="e.g. 24" min="0" />
+          </div>
+          <div class="form-group">
+            <label for="fTotalEp">Total Episodes</label>
+            <input type="number" id="fTotalEp" placeholder="e.g. 25" min="0" />
+          </div>
+        </div>
+
+        <div class="form-group full">
+          <label>Your Rating</label>
+          <div class="star-rating" id="starRating">
+            <span class="star" data-val="1">★</span>
+            <span class="star" data-val="2">★</span>
+            <span class="star" data-val="3">★</span>
+            <span class="star" data-val="4">★</span>
+            <span class="star" data-val="5">★</span>
+            <span class="star" data-val="6">★</span>
+            <span class="star" data-val="7">★</span>
+            <span class="star" data-val="8">★</span>
+            <span class="star" data-val="9">★</span>
+            <span class="star" data-val="10">★</span>
+          </div>
+          <input type="hidden" id="fRating" value="0" />
+          <span class="rating-label" id="ratingLabel">Not rated</span>
+        </div>
+
+        <div class="form-group full">
+          <label for="fCoverUrl">Cover Image URL <small>(optional)</small></label>
+          <input type="url" id="fCoverUrl" placeholder="https://cdn.myanimelist.net/..." />
+        </div>
+
+        <div class="form-group full">
+          <label for="fNotes">Notes / Review <small>(optional)</small></label>
+          <textarea id="fNotes" rows="3" placeholder="Your thoughts on this anime..."></textarea>
+        </div>
+
+        <div class="form-group full">
+          <label for="fYear">Year</label>
+          <input type="number" id="fYear" placeholder="e.g. 2023" min="1960" max="2030" />
+        </div>
+
+        <div class="form-actions">
+          <button type="button" class="btn-cancel" id="cancelModal">Cancel</button>
+          <button type="submit" class="btn-save" id="saveBtn">Save Anime</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ──────────── DETAIL MODAL ──────────── -->
+  <div class="modal-overlay" id="detailOverlay">
+    <div class="modal detail-modal" id="detailModal">
+      <button class="modal-close" id="closeDetail">✕</button>
+      <div id="detailContent"></div>
+    </div>
+  </div>
+
+  <!-- ──────────── TOAST ──────────── -->
+  <div class="toast" id="toast"></div>
+
+  <!-- ──────────── FOOTER ──────────── -->
+  <footer class="site-footer">
+    <p>Made with ❤️ &amp; 🍜 · AnimeHub Personal Watchlist · <span id="footerYear"></span></p>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
